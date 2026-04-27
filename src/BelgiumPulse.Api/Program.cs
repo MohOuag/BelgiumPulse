@@ -1,3 +1,4 @@
+using BelgiumPulse.Infrastructure;
 using BelgiumPulse.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,8 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<BelgiumPulseDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 
