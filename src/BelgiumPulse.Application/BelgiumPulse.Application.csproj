@@ -11,6 +11,14 @@
     <ProjectReference Include="..\BelgiumPulse.Domain\BelgiumPulse.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="AirQuality\Queries\GetAirQualityMeasurements\" />
+    <Folder Include="Stib\Commands\ReportDisruption\" />
+    <Folder Include="Stib\Queries\GetAllStibLines\" />
+    <Folder Include="Stib\Queries\GetStibLineByNumber\" />
+    <Folder Include="Weather\Queries\GetActiveWeatherAlerts\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
