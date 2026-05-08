@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using BelgiumPulse.Application.Stib.Queries.GetAllStibLines;
 using BelgiumPulse.Application.Stib.Queries.GetStibLineByNumber;
 using BelgiumPulse.Application.Stib.Commands.ReportDisruption;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BelgiumPulse.Api.Controllers;
 
@@ -52,6 +53,7 @@ public class StibController : ControllerBase
     [HttpPost("{lineNumber}/disruption")]
     [ProducesResponseType(200)]
     [ProducesResponseType(404)]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> ReportDisruption(
         string lineNumber,
         [FromBody] ReportDisruptionRequest request,

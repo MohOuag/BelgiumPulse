@@ -42,6 +42,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// Health Checks
+builder.Services.AddHealthChecks()
+    .AddSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")!,
+        name: "database",
+        tags: new[] { "db", "sql" });
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("BelgiumPulsePolicy", policy =>
@@ -73,6 +80,30 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+// Health check endpoint
+app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+
+        var result = new
+        {
+            status = report.Status.ToString(),
+            duration = report.TotalDuration,
+            entries = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                duration = e.Value.Duration
+            })
+        };
+
+        await context.Response.WriteAsync(
+            System.Text.Json.JsonSerializer.Serialize(result));
+    }
+});
+
 // Migration automatique au démarrage
 using (var scope = app.Services.CreateScope())
 {
@@ -80,5 +111,15 @@ using (var scope = app.Services.CreateScope())
         .GetRequiredService<BelgiumPulseDbContext>();
     await db.Database.MigrateAsync();
 }
+
+// Minimal API — exemple de ping simple
+app.MapGet("/ping", () => Results.Ok(new
+{
+    status = "alive",
+    timestamp = DateTime.UtcNow,
+    version = "1.0.0"
+}))
+.WithTags("Health")
+.WithOpenApi();
 
 app.Run();
