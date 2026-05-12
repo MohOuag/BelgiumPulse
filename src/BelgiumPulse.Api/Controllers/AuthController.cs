@@ -43,19 +43,22 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(string email)
     {
+        //Création clé signature - clé privée convertie en bytes
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
 
+        //Algorithme de signature
         var credentials = new SigningCredentials(
             key, SecurityAlgorithms.HmacSha256);
 
+        //infos embarquées dans token
         var claims = new[]
         {
-            new Claim(ClaimTypes.Email, email),
-            new Claim(ClaimTypes.Role, "Admin"),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.Email, email), //user
+            new Claim(ClaimTypes.Role, "Admin"), //role
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), //id token
             new Claim(JwtRegisteredClaimNames.Iat,
-                DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
+                DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()) //temps émission token
         };
 
         var token = new JwtSecurityToken(

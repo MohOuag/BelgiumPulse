@@ -9,13 +9,16 @@ public class ReportDisruptionHandler
 {
     private readonly IStibRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMessagePublisher _publisher;
 
     public ReportDisruptionHandler(
         IStibRepository repository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IMessagePublisher publisher)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
+        _publisher = publisher;
     }
 
     public async Task<bool> Handle(
@@ -34,6 +37,18 @@ public class ReportDisruptionHandler
 
         await _repository.UpdateAsync(line, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Publie via l'interface — pas de dépendance sur Infrastructure
+        await _publisher.PublishAsync(
+            new
+            {
+                LineId = line.Id,
+                LineNumber = line.LineNumber,
+                DisruptionMessage = request.Message,
+                OccurredAt = DateTime.UtcNow
+            },
+            routingKey: "stib.disruption.reported",
+            cancellationToken: cancellationToken);
 
         return true;
     }
