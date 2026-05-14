@@ -49,7 +49,10 @@ builder.Services.AddHealthChecks()
     .AddSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")!,
         name: "database",
-        tags: new[] { "db", "sql" });
+        tags: new[] { "db", "sql" })
+    .AddRedis(
+        builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379",
+        name: "redis");
 
 builder.Services.AddCors(options =>
 {

@@ -59,6 +59,7 @@ public class RabbitMqPublisher : IMessagePublisher, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        //Onferme proprement le cana et la connexion
         await _channel.DisposeAsync();
         await _connection.DisposeAsync();
     }

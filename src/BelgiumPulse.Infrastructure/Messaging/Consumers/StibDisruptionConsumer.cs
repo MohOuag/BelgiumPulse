@@ -40,9 +40,9 @@ public class StibDisruptionConsumer : BackgroundService
         // Déclare la queue
         await _channel.QueueDeclareAsync(
             queue: QueueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
+            durable: true, //survit au redémarrage
+            exclusive: false, //plusieurs instances du Consumer peuvent écouter la même queue
+            autoDelete: false, // les messages s'accumulent jusqu'au retour du consumer, pas de suppression
             cancellationToken: stoppingToken);
 
         // Lie la queue à l'exchange via le routing key
@@ -58,6 +58,7 @@ public class StibDisruptionConsumer : BackgroundService
         {
             try
             {
+                //Déserialise le message
                 var body = Encoding.UTF8.GetString(args.Body.ToArray());
                 var message = JsonSerializer
                     .Deserialize<StibDisruptionMessage>(body);
@@ -94,7 +95,7 @@ public class StibDisruptionConsumer : BackgroundService
 
         await _channel.BasicConsumeAsync(
             queue: QueueName,
-            autoAck: false, // on gère l'Ack manuellement
+            autoAck: false, // on gère l'Ack manuellement - RabbitMQ garde le message jusqu'à ce qu'on lui dise
             consumer: consumer,
             cancellationToken: stoppingToken);
 

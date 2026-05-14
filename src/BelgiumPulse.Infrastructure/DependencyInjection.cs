@@ -1,4 +1,5 @@
 ﻿using BelgiumPulse.Domain.Interfaces;
+using BelgiumPulse.Infrastructure.Caching;
 using BelgiumPulse.Infrastructure.ExternalApis.AirQuality;
 using BelgiumPulse.Infrastructure.ExternalApis.Stib;
 using BelgiumPulse.Infrastructure.ExternalApis.Weather;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RabbitMQ.Client;
+using StackExchange.Redis;
 
 namespace BelgiumPulse.Infrastructure;
 
@@ -69,6 +71,15 @@ public static class DependencyInjection
         // Consumers — BackgroundService
         services.AddHostedService<StibDisruptionConsumer>();
         services.AddHostedService<AirQualityAlertConsumer>();
+
+        // Redis
+        var redisConnection = configuration["Redis:ConnectionString"]
+            ?? "localhost:6379";
+
+        services.AddSingleton<IConnectionMultiplexer>(
+            ConnectionMultiplexer.Connect(redisConnection));
+
+        services.AddSingleton<ICacheService, RedisCacheService>();
 
         return services;
     }
