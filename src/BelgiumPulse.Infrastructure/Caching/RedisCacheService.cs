@@ -79,7 +79,7 @@ public class RedisCacheService : ICacheService
         }
     }
 
-    // Pattern Cache-Aside — le plus utilisé en enterprise
+    // Pattern Cache-Aside 
     public async Task<T> GetOrSetAsync<T>(
         string key,
         Func<Task<T>> factory,
@@ -88,10 +88,11 @@ public class RedisCacheService : ICacheService
     {
         // 1. Cherche dans le cache
         var cached = await GetAsync<T>(key, cancellationToken);
+        // HIT - retourne les données
         if (cached is not null)
             return cached;
 
-        // 2. Cache miss — appelle la factory (base de données, API externe...)
+        // 2. MISS — appelle la base de données
         var value = await factory();
 
         // 3. Stocke dans le cache pour les prochaines fois
